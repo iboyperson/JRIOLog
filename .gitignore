@@ -1,0 +1,15 @@
+#Output Directories
+bin/
+out/
+build/
+
+#Gradle Files
+.gradle/
+
+#IDE Files
+#Eclipse
+.classpath
+.project
+.settings/
+#IntelliJ
+.idea/
