@@ -10,46 +10,59 @@ import java.util.logging.Logger;
 
 public class RIOConnection {
     private static Logger log = Logger.getLogger(RIOConnection.class.getName());
+    private static final String FILE_PATH = "/home/lvuser/FRC_UserProgram.log";
 
     private Session session;
-    private PrintStream ps;
     private InputStream input;
     private OutputStream output;
 
-    private String filePath;
+    private String ip;
+    private int port;
+    private String login;
+    private String password;
 
     private final JSch jsch = new JSch();
 
 	public RIOConnection(String ip, int port, String login) throws JSchException {
 		log.setParent(JRIOLog.log);
 
-		filePath = "/home/lvuser/FRC_UserProgram.log";
-		String command = "tail -f " + filePath;
-
-		session = jsch.getSession(login, ip, port);
+		this.ip = ip;
+		this.port = port;
+		this.login = login;
 	}
 
     public RIOConnection(String ip, int port, String login, String password) throws JSchException {
 	    log.setParent(JRIOLog.log);
 
-        filePath = "/home/lvuser/FRC_UserProgram.log";
-	    String command = "tail -f " + filePath;
-
-	    session = jsch.getSession(login, ip, port);
-	    session.setPassword(password);
+	    this.ip = ip;
+	    this.port = port;
+	    this.login = login;
+	    this.password = password;
     }
 
-    public void connect() throws JSchException, IOException {
-        log.info("[RIO] Connecting");
-        session.connect();
+    public boolean connect() throws JSchException, IOException {
+	    session = jsch.getSession(login, ip, port);
+	    if (!password.isEmpty()) {
+	    	session.setPassword(password);
+	    }
+	    session.setConfig("StrictHostKeyChecking", "no");
 
-	    Channel channel = session.openChannel("exec");
-	    String command = "tail -f " + filePath;
-	    ((ChannelExec)channel).setCommand(command);
-	    output = channel.getOutputStream();
-	    channel.connect();
-
-	    log.info("[RIO] Connected");
+        log.info("[RIO] Attempting connection to: " + session.getHost() + ":" + session.getPort());
+        try {
+	        session.connect(5000);
+		    Channel channel = session.openChannel("exec");
+		    String command = "tail -f " + FILE_PATH;
+		    ((ChannelExec)channel).setCommand(command);
+		    input = channel.getInputStream();
+		    channel.connect();
+	        log.info("[RIO] Connection Successful");
+		    return true;
+        }
+        catch (Exception e) {
+        	log.warning("[RIO] Connection Unsuccessful");
+        	e.printStackTrace();
+        	return false;
+        }
     }
 
     public void disconnect() {
@@ -62,11 +75,7 @@ public class RIOConnection {
     	return session.isConnected();
     }
 
-    public void setFilePath(String filePath) {
-    	this.filePath = filePath;
-    }
-
-	public OutputStream getOutput() {
-		return output;
+	public InputStream getInput() {
+		return input;
 	}
 }

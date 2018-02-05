@@ -2,6 +2,7 @@ plugins() {
     id 'java'
     id 'idea'
     id 'eclipse'
+    id 'com.github.johnrengelman.shadow' version "2.0.2"
 }
 
 group 'com.iboy'
@@ -17,6 +18,14 @@ dependencies {
     compile group: 'com.jcraft', name: 'jsch', version: '0.1.54'
     compile group: 'org.apache.commons', name: 'commons-configuration2', version: '2.2'
     compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
+}
+
+jar {
+    manifest {
+        attributes( "Implementation-Title": rootProject.name,
+                    "Implementation-Version": version,
+                    "Main-Class": "com.iboy.jriolog.JRIOLog")
+    }
 }
 
 task wrapper(type: Wrapper) {
