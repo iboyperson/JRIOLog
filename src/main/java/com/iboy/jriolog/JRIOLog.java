@@ -27,7 +27,9 @@ import java.util.logging.Logger;
 public class JRIOLog extends Application {
 	public static Logger log = Logger.getLogger(JRIOLog.class.getName());
 	private ScheduledExecutorService scheduler;
-
+	private ConfigHandler configHandler;
+	private RIOConnection rio;
+	private TextArea rioLog;
 	private Runnable rioLogFetcher = new Runnable() {
 		@Override
 		public void run() {
@@ -43,10 +45,6 @@ public class JRIOLog extends Application {
 			}
 		}
 	};
-
-	private ConfigHandler configHandler;
-	private RIOConnection rio;
-	private TextArea rioLog;
 	private Ellipse statusIcon;
 
 	public static void main(String[] args) {
@@ -58,12 +56,7 @@ public class JRIOLog extends Application {
 		configHandler = new ConfigHandler();
 
 		//Make a new RIOConnection
-		if (configHandler.getPassword().isEmpty()) {
-			rio = new RIOConnection(configHandler.getIp(), configHandler.getPort(), configHandler.getLogin());
-		}
-		else {
-			rio = new RIOConnection(configHandler.getIp(), configHandler.getPort(), configHandler.getLogin(), configHandler.getPassword());
-		}
+		rio = new RIOConnection();
 
 		//Set Basic Stage Info
 		primaryStage.setTitle("JRIOLog");
@@ -114,13 +107,24 @@ public class JRIOLog extends Application {
 			public void handle(ActionEvent event) {
 				boolean isConnected = false;
 				try {
+					rio.newMdnsConnection();
 					isConnected = rio.connect();
 				}
 				catch (JSchException | IOException e) {
 					e.printStackTrace();
 				}
 
-				if(isConnected) {
+				if (!isConnected) {
+					try {
+						rio.newIpConnection();
+						isConnected = rio.connect();
+					}
+					catch (JSchException | IOException e) {
+						e.printStackTrace();
+					}
+				}
+
+				if (isConnected) {
 					statusIcon.setFill(Color.GREEN);
 					rioLog.clear();
 					rioLog.appendText("Connection Successful\n");
@@ -169,43 +173,36 @@ public class JRIOLog extends Application {
 		grid.setVgap(10);
 		grid.setPadding(new Insets(5, 5, 5, 5));
 
-		Scene scene = new Scene(grid,500,400);
+		Scene scene = new Scene(grid, 500, 400);
 		settingsStage.setScene(scene);
 
 		Label teamLabel = new Label("Team: ");
-		grid.add(teamLabel,0,0);
+		grid.add(teamLabel, 0, 0);
 
 		TextField teamField = new TextField();
 		teamField.setText(configHandler.getTeam());
-		grid.add(teamField,1,0);
-
-		Label ipLabel = new Label("Ip: ");
-		grid.add(ipLabel,0,1);
-
-		TextField ipField = new TextField();
-		ipField.setText(configHandler.getIp());
-		grid.add(ipField,1,1);
+		grid.add(teamField, 1, 0);
 
 		Label portLabel = new Label("Port: ");
-		grid.add(portLabel,0,2);
+		grid.add(portLabel, 0, 2);
 
 		TextField portField = new TextField();
 		portField.setText(Integer.toString(configHandler.getPort()));
-		grid.add(portField,1,2);
+		grid.add(portField, 1, 2);
 
 		Label loginLabel = new Label("Login: ");
-		grid.add(loginLabel,0,3);
+		grid.add(loginLabel, 0, 3);
 
 		TextField loginField = new TextField();
 		loginField.setText(configHandler.getLogin());
-		grid.add(loginField,1,3);
+		grid.add(loginField, 1, 3);
 
 		Label passwdLabel = new Label("Password: ");
-		grid.add(passwdLabel,0,4);
+		grid.add(passwdLabel, 0, 4);
 
 		TextField passwdField = new TextField();
 		passwdField.setText(configHandler.getPassword());
-		grid.add(passwdField,1,4);
+		grid.add(passwdField, 1, 4);
 
 		Button save = new Button("Save");
 		save.setOnAction(new EventHandler<ActionEvent>() {
@@ -213,11 +210,6 @@ public class JRIOLog extends Application {
 			public void handle(ActionEvent event) {
 				if (!teamField.getText().equals(configHandler.getTeam())) {
 					configHandler.setTeam(teamField.getText());
-				}
-
-				if (!ipField.getText().equals(configHandler.getIp())) {
-					configHandler.setIp(ipField.getText());
-					configHandler.setIpUserSet(true);
 				}
 
 				if (!portField.getText().equals(configHandler.getPort())) {
@@ -239,10 +231,6 @@ public class JRIOLog extends Application {
 					teamField.setText(configHandler.getTeam());
 				}
 
-				if (!ipField.getText().equals(configHandler.getIp())) {
-					ipField.setText(configHandler.getIp());
-				}
-
 				if (!portField.getText().equals(configHandler.getPort())) {
 					portField.setText(Integer.toString(configHandler.getPort()));
 				}
@@ -256,7 +244,7 @@ public class JRIOLog extends Application {
 				}
 			}
 		});
-		grid.add(save,0,5);
+		grid.add(save, 0, 5);
 
 		settingsStage.show();
 	}
@@ -264,6 +252,7 @@ public class JRIOLog extends Application {
 	private void startScheduledExecutorService() {
 		scheduler = Executors.newScheduledThreadPool(1);
 		scheduler.execute(rioLogFetcher);
+		//Platform.runLater(rioLogFetcher);
 		//scheduler.scheduleAtFixedRate(rioLogFetcher,1,1,TimeUnit.MILLISECONDS);
 		//scheduler.schedule(rioLogFetcher,0,TimeUnit.MILLISECONDS);
 	}

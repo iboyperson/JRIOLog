@@ -1,0 +1,27 @@
+install:
+  - choco install -y InnoSetup
+
+build_script:
+  - gradlew.bat jfxNative --no-daemon --stacktrace
+
+platform:
+  - x64
+
+artifacts:
+  - path: ui\build\jfx\native\*.exe
+
+
+deploy:
+  provider: GitHub
+  description: ''
+  auth_token:
+      secure: J908WC6LZGYPMsuDdRqf9ub/6usg6DwiAjVsv0WjLPR1Pf7xMP890lIbGg/TsXZe
+  artifact: /.*\.exe/           # upload all exe packages to release assets
+  draft: true
+  prerelease: true
+  on:
+    branch: master                # release from master branch only
+    appveyor_repo_tag: true       # deploy on tag push only
+
+cache:
+  - C:\Users\appveyor\.gradle

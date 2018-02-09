@@ -20,6 +20,7 @@ public class ConfigHandler {
 
 	//Congig Vars
 	private String team;
+	private String mdnsIp;
 	private String ip;
 	private int port;
 	private String login;
@@ -59,12 +60,13 @@ public class ConfigHandler {
 				log.info("Setting Stock Values");
 				config.addProperty("team", "0000");
 				config.addProperty("ip", "10.00.00.2");
-				config.addProperty("ip.user-set", false);
+				config.addProperty("ip.mdns", "roboRIO-0000-FRC.local");
 				config.addProperty("port", 22);
 				config.addProperty("login", "lvuser");
 				config.addProperty("password", "");
 			}
 			team = config.getProperty("team").toString();
+			mdnsIp = config.getProperty("ip.mdns").toString();
 			ip = config.getProperty("ip").toString();
 			port = Integer.parseInt(config.getProperty("port").toString());
 			login = config.getProperty("login").toString();
@@ -79,14 +81,17 @@ public class ConfigHandler {
 		//Set Team in configuration file
 		config.setProperty("team",team);
 
-		if (!Boolean.parseBoolean(config.getProperty("ip.user-set").toString())) {
-			this.setIp(this.parseTeamToIp(team));
-		}
+		this.setIp(this.parseTeamToIp(team));
+		this.setMdnsIp("roboRIO-" + team + "-FRC.local");
 	}
 
 
 	public void setIp(String ip) {
 		config.setProperty("ip", ip);
+	}
+
+	public void setMdnsIp(String mdnsIp) {
+		config.setProperty("ip.mdns", mdnsIp);
 	}
 
 	public void setIpUserSet(boolean userSet) {
@@ -115,6 +120,10 @@ public class ConfigHandler {
 
 	public String getTeam() {
 		return team;
+	}
+
+	public String getMdnsIp() {
+		return mdnsIp;
 	}
 
 	public String getIp() {

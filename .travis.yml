@@ -1,6 +1,23 @@
-install: gradle wrapper
-
 language: java
 
-jdk:
-- oraclejdk8
+os:
+  - linux
+  - osx
+
+jdk: oraclejdk8
+osx_image: xcode9.2
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "yXYmSxqCtHAu2JzJslRM1AdKjKNtvRkzq8y1kVnsSS2tSUCrNOrd91B7jthj5gfGSlehr6R6FEC2u6Eu+hAw8S8UZ7VEy1a/LVbi5TILObgRobijddhYw7PWwLY+sXV7CXhJ2may7ozb3qkyXMh/JBXoo8qBpqe9PUc7+mgezB1zc8Fn5/niT/HyIWpAUfUX7afwKtfX9joHXL+mjU+i1iXPFkx02vJ2XKlEFVjNDSuTjWKKIZ7guFqcf90Pi7V13hf+fivNlxwcWPkpbc1Vb1Qy2TDjYMrtVnbaVIgykNMfrfXuP4oMHdC+yvhagYJ+Qa+98698lamzTXtx64KQ6tGYyKK2zyEDVgbPoP6gSSyVAy7fwlYoBEybHc6nwLSzYauGUABcWRqeZU2zO94lzxbHDbofOQ4EXnz7yIboKs4ov7/8L8rwk104HlmyZRwEmkXT+aNmX3YWEr62aL/XWpJtSs+XX2hn6JDVamBO40C5UCaAL1KMO08DOiADW3RtFzYDWUqU+omVfNwF7reyuX0sJlkYT4sH5dxAxZToWlG5340hwIMJ8k+7qldXbf7xv5GfsklL+PINbBmD7eKOH+7kELowWhAoKKIqJZQbwWP06HZjkNo59Ufuw6KUwF9E2rgrSu7kO4qlINu015hCH1IOkb0lYlOCiFWiqV+yJGU="
+  file_glob: true
+  file: 'build/jfx/native/*.{deb,pkg,dmg}'
+  on:
+    repo: iboyperson/JRIOLog
+    tags: true
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/

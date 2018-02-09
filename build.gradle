@@ -1,9 +1,20 @@
+buildscript {
+    dependencies {
+        classpath group: 'de.dynamicfiles.projects.gradle.plugins', name: 'javafx-gradle-plugin', version: '8.8.2'
+    }
+
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+}
+
 plugins() {
     id 'java'
     id 'idea'
     id 'eclipse'
-    id 'com.github.johnrengelman.shadow' version "2.0.2"
 }
+apply plugin: 'javafx-gradle-plugin'
 
 group 'com.iboy'
 version '1.0'
@@ -17,9 +28,17 @@ repositories {
 dependencies {
     compile group: 'com.jcraft', name: 'jsch', version: '0.1.54'
     compile group: 'org.apache.commons', name: 'commons-configuration2', version: '2.2'
-    compile group: 'commons-beanutils', name: 'commons-beanutils', version: '1.9.3'
 }
 
+jfx {
+    //jfxJar-task
+    mainClass = 'com.iboy.jriolog.JRIOLog'
+
+    //jfxNative-task
+    identifier = 'JRIOLog'
+    appName = 'JRIOLog'
+    vendor = 'iboyperson'
+}
 jar {
     manifest {
         attributes( "Implementation-Title": rootProject.name,
