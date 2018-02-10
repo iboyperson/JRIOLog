@@ -39,13 +39,7 @@ jfx {
     identifier = 'JRIOLog'
     appName = 'JRIOLog'
     vendor = 'iboyperson'
-}
-jar {
-    manifest {
-        attributes( "Implementation-Title": rootProject.name,
-                    "Implementation-Version": version,
-                    "Main-Class": "com.iboy.jriolog.JRIOLog")
-    }
+    nativeReleaseVersion = version
 }
 
 task wrapper(type: Wrapper) {
