@@ -8,7 +8,7 @@ platform:
   - x64
 
 artifacts:
-  - path: ui\build\jfx\native\*.exe
+  - path: build\jfx\native\*.exe
 
 
 deploy:
