@@ -13,11 +13,8 @@ public class RIOConnection {
     private static Logger log = Logger.getLogger(RIOConnection.class.getName());
     private static final String FILE_PATH = "/home/lvuser/FRC_UserProgram.log";
 
-	private ConfigHandler configHandler;
-
     private Session session;
     private InputStream input;
-    private OutputStream output;
 
 	private String mdnsIp;
     private String ip;
@@ -27,14 +24,7 @@ public class RIOConnection {
 
     private final JSch jsch = new JSch();
 
-    public RIOConnection() {
-	    try {
-		    configHandler = new ConfigHandler();
-	    }
-	    catch (ConfigurationException e) {
-		    e.printStackTrace();
-	    }
-
+    public RIOConnection(ConfigHandler configHandler) {
 	    mdnsIp = configHandler.getMdnsIp();
 	    ip = configHandler.getIp();
 	    port = configHandler.getPort();
@@ -52,7 +42,7 @@ public class RIOConnection {
     }
 
     public void newIpConnection() throws JSchException {
-	    session = jsch.getSession(login, mdnsIp, port);
+	    session = jsch.getSession(login, ip, port);
 	    if (!password.isEmpty()) {
 		    session.setPassword(password);
 	    }

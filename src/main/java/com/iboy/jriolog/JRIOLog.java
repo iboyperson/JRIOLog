@@ -52,11 +52,12 @@ public class JRIOLog extends Application {
 	}
 
 	@Override
-	public void start(Stage primaryStage) throws Exception {
+	public void start(Stage primaryStage) {
 		configHandler = new ConfigHandler();
 
+
 		//Make a new RIOConnection
-		rio = new RIOConnection();
+		rio = new RIOConnection(configHandler);
 
 		//Set Basic Stage Info
 		primaryStage.setTitle("JRIOLog");
@@ -197,12 +198,12 @@ public class JRIOLog extends Application {
 		loginField.setText(configHandler.getLogin());
 		grid.add(loginField, 1, 3);
 
-		Label passwdLabel = new Label("Password: ");
-		grid.add(passwdLabel, 0, 4);
+		Label passwordLabel = new Label("Password: ");
+		grid.add(passwordLabel, 0, 4);
 
-		TextField passwdField = new TextField();
-		passwdField.setText(configHandler.getPassword());
-		grid.add(passwdField, 1, 4);
+		TextField passwordField = new TextField();
+		passwordField.setText(configHandler.getPassword());
+		grid.add(passwordField, 1, 4);
 
 		Button save = new Button("Save");
 		save.setOnAction(new EventHandler<ActionEvent>() {
@@ -220,11 +221,11 @@ public class JRIOLog extends Application {
 					configHandler.setLogin(loginField.getText());
 				}
 
-				if (!passwdField.getText().equals(configHandler.getPassword())) {
-					configHandler.setPassword(passwdField.getText());
+				if (!passwordField.getText().equals(configHandler.getPassword())) {
+					configHandler.setPassword(passwordField.getText());
 				}
 
-				configHandler.reloadConfig();
+				configHandler.loadConfig();
 
 				//Reload Text Fields
 				if (!teamField.getText().equals(configHandler.getTeam())) {
@@ -239,8 +240,8 @@ public class JRIOLog extends Application {
 					loginField.setText(configHandler.getLogin());
 				}
 
-				if (!passwdField.getText().equals(configHandler.getPassword())) {
-					passwdField.setText(configHandler.getPassword());
+				if (!passwordField.getText().equals(configHandler.getPassword())) {
+					passwordField.setText(configHandler.getPassword());
 				}
 			}
 		});
@@ -252,9 +253,6 @@ public class JRIOLog extends Application {
 	private void startScheduledExecutorService() {
 		scheduler = Executors.newScheduledThreadPool(1);
 		scheduler.execute(rioLogFetcher);
-		//Platform.runLater(rioLogFetcher);
-		//scheduler.scheduleAtFixedRate(rioLogFetcher,1,1,TimeUnit.MILLISECONDS);
-		//scheduler.schedule(rioLogFetcher,0,TimeUnit.MILLISECONDS);
 	}
 
 	private void stopScheduledExecutorService() {

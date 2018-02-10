@@ -4,7 +4,6 @@ import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.FileBasedConfiguration;
 import org.apache.commons.configuration2.PropertiesConfiguration;
 import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.builder.fluent.Parameters;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 
@@ -15,7 +14,7 @@ import java.util.logging.Logger;
 public class ConfigHandler {
 	private static Logger log = Logger.getLogger(ConfigHandler.class.getName());
 
-	FileBasedConfigurationBuilder<FileBasedConfiguration> builder;
+	private FileBasedConfigurationBuilder<FileBasedConfiguration> builder;
 	private Configuration config;
 
 	//Congig Vars
@@ -26,12 +25,11 @@ public class ConfigHandler {
 	private String login;
 	private String password;
 
-	public ConfigHandler() throws ConfigurationException {
+	public ConfigHandler() {
 		log.setParent(JRIOLog.log);
 
 		Parameters params = new Parameters();
 
-		Configurations configs = new Configurations();
 		String home = System.getProperty("user.home");
 		File confDir = new File(home + "/JRIOLog");
 		File propertiesFile = new File(confDir, "config.properties");
@@ -57,7 +55,7 @@ public class ConfigHandler {
 		try {
 			config = builder.getConfiguration();
 			if (newFile) {
-				log.info("Setting Stock Values");
+				log.info("Configuration file not found. Setting default values");
 				config.addProperty("team", "0000");
 				config.addProperty("ip", "10.00.00.2");
 				config.addProperty("ip.mdns", "roboRIO-0000-FRC.local");
@@ -65,16 +63,12 @@ public class ConfigHandler {
 				config.addProperty("login", "lvuser");
 				config.addProperty("password", "");
 			}
-			team = config.getProperty("team").toString();
-			mdnsIp = config.getProperty("ip.mdns").toString();
-			ip = config.getProperty("ip").toString();
-			port = Integer.parseInt(config.getProperty("port").toString());
-			login = config.getProperty("login").toString();
-			password = config.getProperties("password").toString();
 		}
 		catch (ConfigurationException e) {
 			log.warning("Failed to load configuration. Exiting.");
+			e.printStackTrace();
 		}
+		this.loadConfig();
 	}
 
 	public void setTeam(String team) {
@@ -85,17 +79,12 @@ public class ConfigHandler {
 		this.setMdnsIp("roboRIO-" + team + "-FRC.local");
 	}
 
-
 	public void setIp(String ip) {
 		config.setProperty("ip", ip);
 	}
 
 	public void setMdnsIp(String mdnsIp) {
 		config.setProperty("ip.mdns", mdnsIp);
-	}
-
-	public void setIpUserSet(boolean userSet) {
-		config.setProperty("ip.user-set", userSet);
 	}
 
 	public void setPort(int port) {
@@ -110,12 +99,14 @@ public class ConfigHandler {
 		config.setProperty("password", password);
 	}
 
-	public void reloadConfig() {
+	public void loadConfig() {
 		team = config.getProperty("team").toString();
 		ip = config.getProperty("ip").toString();
+		mdnsIp = config.getProperty("ip.mdns").toString();
 		port = Integer.parseInt(config.getProperty("port").toString());
 		login = config.getProperty("login").toString();
-		password = config.getProperties("password").toString();
+		password = config.getProperty("password").toString();
+		log.info("Configs loaded successfully");
 	}
 
 	public String getTeam() {
