@@ -8,6 +8,11 @@ matrix:
     - os: osx
       osx_image: xcode9.2
 
+addons:
+  apt:
+    packages:
+      - fakeroot
+
 install:
   - '[ "${TRAVIS_PULL_REQUEST}" = "false" ] && ./gradlew jfxNative --no-daemon --stacktrace || ./gradlew --stacktrace '
 
