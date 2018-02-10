@@ -25,6 +25,7 @@ deploy:
   skip_cleanup: true
   on:
     repo: iboyperson/JRIOLog
+    branch: master
     tags: true
 
 before_cache:
