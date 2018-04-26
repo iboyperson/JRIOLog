@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.logging.Logger;
 
 public class ConfigHandler {
-	private static Logger log = Logger.getLogger(ConfigHandler.class.getName());
+	private Logger log;
 
 	private FileBasedConfigurationBuilder<FileBasedConfiguration> builder;
 	private Configuration config;
@@ -26,7 +26,7 @@ public class ConfigHandler {
 	private String password;
 
 	public ConfigHandler() {
-		log.setParent(JRIOLog.log);
+		log = Logger.getLogger(ConfigHandler.class.getName());
 
 		Parameters params = new Parameters();
 
@@ -73,7 +73,7 @@ public class ConfigHandler {
 
 	public void setTeam(String team) {
 		//Set Team in configuration file
-		config.setProperty("team",team);
+		config.setProperty("team", team);
 
 		this.setIp(this.parseTeamToIp(team));
 		this.setMdnsIp("roboRIO-" + team + "-FRC.local");

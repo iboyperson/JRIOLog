@@ -25,7 +25,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Logger;
 
 public class JRIOLog extends Application {
-	public static Logger log = Logger.getLogger(JRIOLog.class.getName());
+	private Logger log;
 	private ScheduledExecutorService scheduler;
 	private ConfigHandler configHandler;
 	private RIOConnection rio;
@@ -53,8 +53,8 @@ public class JRIOLog extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
+		log = Logger.getLogger(JRIOLog.class.getName());
 		configHandler = new ConfigHandler();
-
 
 		//Make a new RIOConnection
 		rio = new RIOConnection(configHandler);
@@ -106,23 +106,15 @@ public class JRIOLog extends Application {
 		start.setOnAction(new EventHandler<ActionEvent>() {
 			@Override
 			public void handle(ActionEvent event) {
+				rioLog.clear();
+
 				boolean isConnected = false;
+
 				try {
-					rio.newMdnsConnection();
 					isConnected = rio.connect();
 				}
 				catch (JSchException | IOException e) {
-					e.printStackTrace();
-				}
-
-				if (!isConnected) {
-					try {
-						rio.newIpConnection();
-						isConnected = rio.connect();
-					}
-					catch (JSchException | IOException e) {
-						e.printStackTrace();
-					}
+					//e.printStackTrace();
 				}
 
 				if (isConnected) {
