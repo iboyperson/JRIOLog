@@ -1,5 +1,6 @@
 package com.iboy.jriolog;
 
+import com.iboy.jriolog.stages.SettingsStage;
 import com.jcraft.jsch.JSchException;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -8,9 +9,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
@@ -25,229 +24,151 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Logger;
 
 public class JRIOLog extends Application {
-	private Logger log;
-	private ScheduledExecutorService scheduler;
-	private ConfigHandler configHandler;
-	private RIOConnection rio;
-	private TextArea rioLog;
-	private Runnable rioLogFetcher = new Runnable() {
-		@Override
-		public void run() {
-			BufferedReader br = new BufferedReader(new InputStreamReader(rio.getInput()));
-			String line;
-			try {
-				while ((line = br.readLine()) != null) {
-					rioLog.appendText(line + "\n");
-				}
-			}
-			catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	};
-	private Ellipse statusIcon;
+    private Logger log;
+    private ScheduledExecutorService scheduler;
+    private ConfigHandler configHandler;
+    private RIOConnection rio;
+    private TextArea rioLog;
+    private SettingsStage settingsStage;
+    private Runnable rioLogFetcher = new Runnable() {
+        @Override
+        public void run() {
+            BufferedReader br = new BufferedReader(new InputStreamReader(rio.getInput()));
+            String line;
+            try {
+                while ((line = br.readLine()) != null) {
+                    rioLog.appendText(line + "\n");
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+    private Ellipse statusIcon;
 
-	public static void main(String[] args) {
-		launch(args);
-	}
+    public static void main(String[] args) {
+        launch(args);
+    }
 
-	@Override
-	public void start(Stage primaryStage) {
-		log = Logger.getLogger(JRIOLog.class.getName());
-		configHandler = new ConfigHandler();
+    @Override
+    public void start(Stage primaryStage) {
+        log = Logger.getLogger(JRIOLog.class.getName());
+        scheduler = Executors.newScheduledThreadPool(1);
+        configHandler = new ConfigHandler();
 
-		//Make a new RIOConnection
-		rio = new RIOConnection(configHandler);
+        //Make a new RIOConnection
+        rio = new RIOConnection(configHandler);
 
-		//Set Basic Stage Info
-		primaryStage.setTitle("JRIOLog");
-		primaryStage.setMinWidth(640);
-		primaryStage.setMinHeight(480);
-		primaryStage.setWidth(Screen.getPrimary().getVisualBounds().getWidth());
-		primaryStage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
+        //Set Basic Stage Info
+        primaryStage.setTitle("JRIOLog");
+        primaryStage.setMinWidth(640);
+        primaryStage.setMinHeight(480);
+        primaryStage.setWidth(Screen.getPrimary().getVisualBounds().getWidth());
+        primaryStage.setHeight(Screen.getPrimary().getVisualBounds().getHeight());
 
-		//Create GridBagLayout
-		GridPane grid = new GridPane();
-		grid.setAlignment(Pos.TOP_LEFT);
-		grid.setHgap(10);
-		grid.setVgap(10);
-		grid.setPadding(new Insets(5, 5, 5, 5));
+        //Create GridBagLayout
+        GridPane grid = new GridPane();
+        grid.setAlignment(Pos.TOP_LEFT);
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(5, 5, 5, 5));
 
-		//Create Scene and set it as primaryStage scene
-		Scene scene = new Scene(grid, primaryStage.getWidth(), primaryStage.getHeight());
-		primaryStage.setScene(scene);
+        //Create Scene and set it as primaryStage scene
+        Scene scene = new Scene(grid, primaryStage.getWidth(), primaryStage.getHeight());
+        primaryStage.setScene(scene);
 
-		// Show grid lines for Debugging
-		grid.setGridLinesVisible(false);
-		if (grid.isGridLinesVisible()) {
-			log.info("Application in debugging mode");
-		}
+        // Show grid lines for Debugging
+        grid.setGridLinesVisible(false);
+        if (grid.isGridLinesVisible()) {
+            log.info("Application in debugging mode");
+        }
 
-		//Create the log output area
-		rioLog = new TextArea();
-		rioLog.setPrefSize(scene.getWidth(), scene.getHeight());
-		rioLog.setEditable(false);
-		grid.add(rioLog, 1, 0, 5, 5);
+        //Create the log output area
+        rioLog = new TextArea();
+        rioLog.setPrefSize(scene.getWidth(), scene.getHeight());
+        rioLog.setEditable(false);
+        grid.add(rioLog, 1, 0, 5, 5);
 
-		//Create Status Ellipse
-		statusIcon = new Ellipse(25, 25);
-		statusIcon.setStroke(Color.BLACK);
-		statusIcon.setStrokeWidth(2.0);
-		statusIcon.setFill(Color.RED);
-		grid.add(statusIcon, 0, 0);
+        //Create Status Ellipse
+        statusIcon = new Ellipse(25, 25);
+        statusIcon.setStroke(Color.BLACK);
+        statusIcon.setStrokeWidth(2.0);
+        statusIcon.setFill(Color.RED);
+        grid.add(statusIcon, 0, 0);
 
-		//Create Buttons
-		Button start = new Button("Start");
-		Button stop = new Button("Stop");
+        //Create Buttons
+        Button start = new Button("Start");
+        Button stop = new Button("Stop");
 
-		start.setDisable(false);
-		stop.setDisable(true);
+        start.setDisable(false);
+        stop.setDisable(true);
 
-		start.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				rioLog.clear();
+        start.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                rioLog.clear();
 
-				boolean isConnected = false;
+                boolean isConnected = false;
 
-				try {
-					isConnected = rio.connect();
-				}
-				catch (JSchException | IOException e) {
-					//e.printStackTrace();
-				}
+                try {
+                    isConnected = rio.connect();
+                } catch (JSchException e) {
+                    //e.printStackTrace();
+                }
 
-				if (isConnected) {
-					statusIcon.setFill(Color.GREEN);
-					rioLog.clear();
-					rioLog.appendText("Connection Successful\n");
-					startScheduledExecutorService();
-					start.setDisable(true);
-					stop.setDisable(false);
-				}
-				else {
-					rioLog.appendText("Connection Unsuccessful\n");
-				}
-			}
-		});
-		grid.add(start, 0, 1);
+                if (isConnected) {
+                    statusIcon.setFill(Color.GREEN);
+                    rioLog.clear();
+                    rioLog.appendText("Connection Successful\n");
+                    startScheduledExecutorService();
+                    start.setDisable(true);
+                    stop.setDisable(false);
+                } else {
+                    rioLog.appendText("Connection Unsuccessful\n");
+                }
+            }
+        });
+        grid.add(start, 0, 1);
 
-		stop.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				rio.disconnect();
-				stopScheduledExecutorService();
-				statusIcon.setFill(Color.RED);
-				start.setDisable(false);
-				stop.setDisable(true);
-			}
-		});
-		grid.add(stop, 0, 2);
+        stop.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                rio.disconnect();
+                stopScheduledExecutorService();
+                statusIcon.setFill(Color.RED);
+                start.setDisable(false);
+                stop.setDisable(true);
+            }
+        });
+        grid.add(stop, 0, 2);
 
-		Button settings = new Button("Settings");
-		settings.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				showSettings();
-			}
-		});
-		grid.add(settings, 0, 3);
+        Button settings = new Button("Settings");
+        settings.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                SettingsStage settingsStage = new SettingsStage(configHandler);
+                settingsStage.show();
+            }
+        });
+        grid.add(settings, 0, 3);
 
-		primaryStage.show();
-	}
+        primaryStage.show();
+    }
 
-	public void showSettings() {
-		Stage settingsStage = new Stage();
-		settingsStage.setTitle("Settings");
+    @Override
+    public void stop(){
+        log.info("Exiting JRIOLog");
+        //stopScheduledExecutorService();
+        //rio.disconnect();
+    }
 
-		GridPane grid = new GridPane();
-		grid.setAlignment(Pos.TOP_LEFT);
-		grid.setHgap(10);
-		grid.setVgap(10);
-		grid.setPadding(new Insets(5, 5, 5, 5));
+    private void startScheduledExecutorService() {
+        scheduler.execute(rioLogFetcher);
+    }
 
-		Scene scene = new Scene(grid, 500, 400);
-		settingsStage.setScene(scene);
-
-		Label teamLabel = new Label("Team: ");
-		grid.add(teamLabel, 0, 0);
-
-		TextField teamField = new TextField();
-		teamField.setText(configHandler.getTeam());
-		grid.add(teamField, 1, 0);
-
-		Label portLabel = new Label("Port: ");
-		grid.add(portLabel, 0, 2);
-
-		TextField portField = new TextField();
-		portField.setText(Integer.toString(configHandler.getPort()));
-		grid.add(portField, 1, 2);
-
-		Label loginLabel = new Label("Login: ");
-		grid.add(loginLabel, 0, 3);
-
-		TextField loginField = new TextField();
-		loginField.setText(configHandler.getLogin());
-		grid.add(loginField, 1, 3);
-
-		Label passwordLabel = new Label("Password: ");
-		grid.add(passwordLabel, 0, 4);
-
-		TextField passwordField = new TextField();
-		passwordField.setText(configHandler.getPassword());
-		grid.add(passwordField, 1, 4);
-
-		Button save = new Button("Save");
-		save.setOnAction(new EventHandler<ActionEvent>() {
-			@Override
-			public void handle(ActionEvent event) {
-				if (!teamField.getText().equals(configHandler.getTeam())) {
-					configHandler.setTeam(teamField.getText());
-				}
-
-				if (!portField.getText().equals(configHandler.getPort())) {
-					configHandler.setPort(Integer.parseInt(portField.getText()));
-				}
-
-				if (!loginField.getText().equals(configHandler.getLogin())) {
-					configHandler.setLogin(loginField.getText());
-				}
-
-				if (!passwordField.getText().equals(configHandler.getPassword())) {
-					configHandler.setPassword(passwordField.getText());
-				}
-
-				configHandler.loadConfig();
-
-				//Reload Text Fields
-				if (!teamField.getText().equals(configHandler.getTeam())) {
-					teamField.setText(configHandler.getTeam());
-				}
-
-				if (!portField.getText().equals(configHandler.getPort())) {
-					portField.setText(Integer.toString(configHandler.getPort()));
-				}
-
-				if (!loginField.getText().equals(configHandler.getLogin())) {
-					loginField.setText(configHandler.getLogin());
-				}
-
-				if (!passwordField.getText().equals(configHandler.getPassword())) {
-					passwordField.setText(configHandler.getPassword());
-				}
-			}
-		});
-		grid.add(save, 0, 5);
-
-		settingsStage.show();
-	}
-
-	private void startScheduledExecutorService() {
-		scheduler = Executors.newScheduledThreadPool(1);
-		scheduler.execute(rioLogFetcher);
-	}
-
-	private void stopScheduledExecutorService() {
-		scheduler.shutdown();
-	}
+    private void stopScheduledExecutorService() {
+        if (!scheduler.isShutdown()) {
+            scheduler.shutdown();
+        }
+    }
 }
