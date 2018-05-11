@@ -1,5 +1,6 @@
 package com.iboy.jriolog;
 
+import com.iboy.jriolog.stages.AboutStage;
 import com.iboy.jriolog.stages.SettingsStage;
 import com.jcraft.jsch.JSchException;
 import javafx.application.Application;
@@ -10,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Ellipse;
@@ -30,6 +32,7 @@ public class JRIOLog extends Application {
     private RIOConnection rio;
     private TextArea rioLog;
     private SettingsStage settingsStage;
+    private AboutStage aboutStage;
     private Runnable rioLogFetcher = new Runnable() {
         @Override
         public void run() {
@@ -52,6 +55,8 @@ public class JRIOLog extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        primaryStage.getIcons().add(new Image("/JRIOLog_Logo_noBackground.png"));
+
         log = Logger.getLogger(JRIOLog.class.getName());
         scheduler = Executors.newScheduledThreadPool(1);
         configHandler = new ConfigHandler();
@@ -87,7 +92,7 @@ public class JRIOLog extends Application {
         rioLog = new TextArea();
         rioLog.setPrefSize(scene.getWidth(), scene.getHeight());
         rioLog.setEditable(false);
-        grid.add(rioLog, 1, 0, 5, 5);
+        grid.add(rioLog, 1, 0, 6, 6);
 
         //Create Status Ellipse
         statusIcon = new Ellipse(25, 25);
@@ -146,11 +151,25 @@ public class JRIOLog extends Application {
         settings.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                SettingsStage settingsStage = new SettingsStage(configHandler);
+                if (settingsStage == null) {
+                    settingsStage = new SettingsStage(configHandler);
+                }
                 settingsStage.show();
             }
         });
         grid.add(settings, 0, 3);
+
+        Button about = new Button("About");
+        about.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                if(aboutStage == null) {
+                    aboutStage = new AboutStage();
+                }
+                aboutStage.show();
+            }
+        });
+        grid.add(about, 0, 4);
 
         primaryStage.show();
     }

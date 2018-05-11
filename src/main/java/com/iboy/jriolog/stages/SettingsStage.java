@@ -9,11 +9,13 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 public class SettingsStage extends Stage {
     public SettingsStage(ConfigHandler configHandler) {
+        getIcons().add(new Image("/JRIOLog_Logo_noBackground.png"));
         setTitle("Settings");
 
         GridPane grid = new GridPane();
