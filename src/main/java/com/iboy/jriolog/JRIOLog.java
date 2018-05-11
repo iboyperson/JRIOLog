@@ -177,8 +177,9 @@ public class JRIOLog extends Application {
     @Override
     public void stop(){
         log.info("Exiting JRIOLog");
-        //stopScheduledExecutorService();
-        //rio.disconnect();
+        stopScheduledExecutorService();
+        rio.disconnect();
+        System.exit(0);
     }
 
     private void startScheduledExecutorService() {
