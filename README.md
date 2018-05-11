@@ -1,4 +1,4 @@
-[logo]: https://github.com/iboyperson/JRIOLog/blob/master/src/main/resources/JRIOLog_Logo_noBackground.png "JRIOLog"
+<img src="https://github.com/iboyperson/JRIOLog/blob/master/src/main/resources/JRIOLog_Logo_noBackground.png" width="150" height="150" />
 
 # JRIOLog
 
