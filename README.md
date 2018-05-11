@@ -1,3 +1,5 @@
+[logo]: https://github.com/iboyperson/JRIOLog/blob/master/src/main/resources/JRIOLog_Logo_noBackground.png "JRIOLog"
+
 # JRIOLog
 
 [![Build Status](https://travis-ci.org/iboyperson/JRIOLog.svg?branch=master)](https://travis-ci.org/iboyperson/JRIOLog)
