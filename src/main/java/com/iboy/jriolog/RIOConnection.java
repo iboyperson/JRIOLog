@@ -2,6 +2,7 @@ package com.iboy.jriolog;
 
 import com.jcraft.jsch.*;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -43,17 +44,23 @@ public class RIOConnection {
 
             try {
                 session.connect(5000);
-                Channel channel = session.openChannel("exec");
-                String command = "tail -f " + FILE_PATH;
-                ((ChannelExec) channel).setCommand(command);
-                input = channel.getInputStream();
-                channel.connect();
-                log.info("[RIO] Connection Successful");
-                isDone = true;
-            } catch (Exception e) {
+                if (session.isConnected()) {
+                    Channel channel = session.openChannel("exec");
+                    String command = "tail -f " + FILE_PATH;
+                    ((ChannelExec) channel).setCommand(command);
+                    input = channel.getInputStream();
+                    channel.connect();
+                    log.info("[RIO] Connection Successful");
+                    isDone = true;
+                }
+            }
+            catch (JSchException e) {
                 log.warning("[RIO] Connection Unsuccessful");
                 trys++;
-                //e.printStackTrace();
+            }
+            catch (IOException e) {
+                log.warning("[RIO] Failed to get input stream");
+                trys++;
             }
         }
 
@@ -62,7 +69,9 @@ public class RIOConnection {
 
     public void disconnect() {
         log.info("[RIO] Disconnecting");
-        session.disconnect();
+        if(session.isConnected()) {
+            session.disconnect();
+        }
         log.info("[RIO] Disconnected");
     }
 
