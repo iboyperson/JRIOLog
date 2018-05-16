@@ -17,7 +17,7 @@ public class ConfigHandler {
     private FileBasedConfigurationBuilder<FileBasedConfiguration> builder;
     private Configuration config;
 
-    //Congig Vars
+    //Config Vars
     private String team;
     private String mdnsIp;
     private String ip;

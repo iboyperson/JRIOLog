@@ -55,7 +55,7 @@ public class JRIOLog extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        primaryStage.getIcons().add(new Image("/JRIOLog_Logo_noBackground.png"));
+        primaryStage.getIcons().add(new Image("/JRIOLog_Logo.png"));
 
         log = Logger.getLogger(JRIOLog.class.getName());
         scheduler = Executors.newScheduledThreadPool(1);
@@ -81,12 +81,6 @@ public class JRIOLog extends Application {
         //Create Scene and set it as primaryStage scene
         Scene scene = new Scene(grid, primaryStage.getWidth(), primaryStage.getHeight());
         primaryStage.setScene(scene);
-
-        // Show grid lines for Debugging
-        grid.setGridLinesVisible(false);
-        if (grid.isGridLinesVisible()) {
-            log.info("Application in debugging mode");
-        }
 
         //Create the log output area
         rioLog = new TextArea();

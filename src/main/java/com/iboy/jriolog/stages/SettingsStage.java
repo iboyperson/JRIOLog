@@ -15,7 +15,7 @@ import javafx.stage.Stage;
 
 public class SettingsStage extends Stage {
     public SettingsStage(ConfigHandler configHandler) {
-        getIcons().add(new Image("/JRIOLog_Logo_noBackground.png"));
+        getIcons().add(new Image("/JRIOLog_Logo.png"));
         setTitle("Settings");
 
         GridPane grid = new GridPane();

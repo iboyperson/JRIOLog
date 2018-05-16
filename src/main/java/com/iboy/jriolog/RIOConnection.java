@@ -25,16 +25,15 @@ public class RIOConnection {
         ips = new ArrayList<String>();
         ips.add(configHandler.getMdnsIp());
         ips.add(configHandler.getIp());
+        ips.add("172.22.11.2");
         port = configHandler.getPort();
         login = configHandler.getLogin();
         password = configHandler.getPassword();
     }
 
     public boolean connect() throws JSchException {
-        boolean isDone = false;
-        int trys = 0;
-        while (!isDone && trys < ips.size()) {
-            session = jsch.getSession(login, ips.get(trys), port);
+        for (String ip : ips) {
+            session = jsch.getSession(login, ip, port);
             if (!password.isEmpty()) {
                 session.setPassword(password);
             }
@@ -51,25 +50,23 @@ public class RIOConnection {
                     input = channel.getInputStream();
                     channel.connect();
                     log.info("[RIO] Connection Successful");
-                    isDone = true;
+                    return true;
                 }
             }
             catch (JSchException e) {
                 log.warning("[RIO] Connection Unsuccessful");
-                trys++;
             }
             catch (IOException e) {
                 log.warning("[RIO] Failed to get input stream");
-                trys++;
             }
         }
 
-        return isDone;
+        return false;
     }
 
     public void disconnect() {
         log.info("[RIO] Disconnecting");
-        if(session.isConnected()) {
+        if(session!= null && session.isConnected()) {
             session.disconnect();
         }
         log.info("[RIO] Disconnected");

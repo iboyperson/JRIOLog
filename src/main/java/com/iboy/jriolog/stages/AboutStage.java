@@ -22,7 +22,7 @@ import java.io.FileNotFoundException;
 public class AboutStage extends Stage {
     FileInputStream logoStream;
     public AboutStage() {
-        getIcons().add(new Image("/JRIOLog_Logo_noBackground.png"));
+        getIcons().add(new Image("/JRIOLog_Logo.png"));
         setTitle("About");
 
         GridPane grid = new GridPane();
@@ -34,7 +34,7 @@ public class AboutStage extends Stage {
         Scene scene = new Scene(grid, 350, 300);
         setScene(scene);
 
-        Image logo = new Image("/JRIOLog_Logo_noBackground.png", 150, 150, true, true);
+        Image logo = new Image("/JRIOLog_Logo.png", 150, 150, true, true);
         ImageView logoView = new ImageView(logo);
         grid.add(logoView, 0, 0);
         GridPane.setHalignment(logoView, HPos.CENTER);
